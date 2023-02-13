@@ -18,10 +18,12 @@ public class Controller{
     @GetMapping(value = "/answer")
     public ResponseEntity<?> getAnswer (@RequestParam(value="value") String value){
         try {
+            logger.info("Trying to parse data...");
             double d = Double.parseDouble(value);
             if (d < 0) {
                 throw new NegativeException("Value can't be negative!");
             }
+            logger.info("Parsing completed!");
         } catch (NumberFormatException e) {
             logger.error("Parsing error: " + value);
             return ResponseEntity.badRequest().body("Parse Error");
