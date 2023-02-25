@@ -1,45 +1,73 @@
 package com.workshop.epam_workshop.model;
 
+import com.workshop.epam_workshop.errors.NegativeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Converter {
 
-    private Double inches;
-    private Double meters;
+    private final HashMap<String, Double> metersToInches = new HashMap<>();
+    private final HashMap<String, Double> inchesToMeters = new HashMap<>();
+    private Double userInput;
     private static final Logger logger = LogManager.getLogger(Converter.class);
 
     public Converter(Double value) {
         logger.info("Created Converter with double");
-        this.meters = Math.round(value * 1000) / 1000.;
-        this.inches = Math.round(value * 39.37 * 1000) / 1000.;
+        this.userInput = value;
+        this.metersToInches.put("meters", value);
+        this.metersToInches.put("inches",  Math.round(value * 39.37 * 1000) / 1000.);
+        this.inchesToMeters.put("inches", value);
+        this.inchesToMeters.put("meters",  Math.round(value / 39.37 * 1000) / 1000.);
     }
 
     public Converter(Integer value) {
         logger.info("Created Converter with Integer");
-        this.meters = Math.round(Double.valueOf(value) * 1000) / 1000.;
-        this.inches =  Math.round(value * 39.37 * 1000) / 1000.;
+        this.userInput = Double.valueOf(value);
+        this.metersToInches.put("meters", Double.valueOf(value));
+        this.metersToInches.put("inches",  Math.round(value * 39.37 * 1000) / 1000.);
+        this.inchesToMeters.put("inches", Double.valueOf(value));
+        this.inchesToMeters.put("meters",  Math.round(value / 39.37 * 1000) / 1000.);
     }
 
-    public Double getMeters() {
-        return meters;
+    public Map<String, Double> getMetersToInches() {
+        return metersToInches;
     }
 
-    public Double getInches() {
-        return inches;
+    public Map<String, Double> getInchesToMeters() {
+        return inchesToMeters;
     }
 
-    public void setInches(Double inches) {
-        this.inches = inches;
+    public Double getUserInput() {
+        return this.userInput;
     }
 
-    public void setMeters(Double value) {
-        this.meters = value;
+    public void setInchesToMeters(Double inches) {
+        this.inchesToMeters.put("inches", inches);
+        this.inchesToMeters.put("meters",  Math.round(inches / 39.37 * 1000) / 1000.);
+    }
+
+    public void setMetersToInches(Double meters) {
+        this.metersToInches.put("meters", meters);
+        this.metersToInches.put("inches",  Math.round(meters * 39.37 * 1000) / 1000.);
+    }
+
+    public void setUserInput(Double input) {
+        this.userInput = input;
     }
 
     public void setAll(Double value) {
-        this.meters = Math.round(value * 1000) / 1000.;
-        this.inches = Math.round(value * 39.37 * 1000) / 1000.;
+        this.metersToInches.put("meters", value);
+        this.metersToInches.put("inches",  Math.round(value * 39.37 * 1000) / 1000.);
+        this.inchesToMeters.put("inches", value);
+        this.inchesToMeters.put("meters",  Math.round(value / 39.37 * 1000) / 1000.);
+    }
+
+    public static void validateData (String value) {
+        double d = Double.parseDouble(value);
+        if (d < 0) throw new NegativeException("Value can't be negative!");
     }
 
 }

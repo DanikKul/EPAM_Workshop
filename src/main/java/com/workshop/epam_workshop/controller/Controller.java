@@ -3,6 +3,7 @@ package com.workshop.epam_workshop.controller;
 import com.workshop.epam_workshop.model.Converter;
 import com.workshop.epam_workshop.errors.NegativeException;
 
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,22 +20,19 @@ public class Controller{
     public ResponseEntity<?> getAnswer (@RequestParam(value="value") String value){
         try {
             logger.info("Trying to parse data...");
-            double d = Double.parseDouble(value);
-            if (d < 0) {
-                throw new NegativeException("Value can't be negative!");
-            }
+            Converter.validateData(value);
             logger.info("Parsing completed!");
         } catch (NumberFormatException e) {
             logger.error("Parsing error: " + value);
-            return ResponseEntity.badRequest().body("Parse Error");
+            return new ResponseEntity<>("Parsing error", HttpStatusCode.valueOf(400));
         } catch (NegativeException e) {
             logger.error("Negative error: " + value);
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatusCode.valueOf(500));
         } catch (Exception e) {
             logger.error("Unhandled error");
-            return ResponseEntity.badRequest().body("Unhandled Error");
+            return new ResponseEntity<>("Unhandled Error", HttpStatusCode.valueOf(500));
         }
-        return ResponseEntity.ok(new Converter(Double.parseDouble(value)));
+        return new ResponseEntity<>(new Converter(Double.parseDouble(value)), HttpStatusCode.valueOf(200));
     }
 
 }
