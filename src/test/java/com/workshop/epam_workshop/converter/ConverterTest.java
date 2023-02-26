@@ -10,13 +10,13 @@ class ConverterTest {
     public void testConverter() {
         Converter con = new Converter(12);
         Assertions.assertEquals(12, con.getMetersToInches().get("meters"));
-        Assertions.assertEquals(472.44, con.getInchesToMeters().get("inches"));
+        Assertions.assertEquals(472.44, con.getMetersToInches().get("inches"));
         con.setAll(0.);
         Assertions.assertEquals(0, con.getMetersToInches().get("meters"));
         Assertions.assertEquals(0, con.getInchesToMeters().get("inches"));
         con.setAll(100.);
-        Assertions.assertEquals(100, con.getMetersToInches().get("meters"));
-        Assertions.assertEquals(3937, con.getInchesToMeters().get("inches"));
+        Assertions.assertEquals(100, con.getInchesToMeters().get("inches"));
+        Assertions.assertEquals(2.54, con.getInchesToMeters().get("meters"));
     }
 
 }

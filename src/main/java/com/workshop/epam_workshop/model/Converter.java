@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class Converter {
 
@@ -32,11 +31,11 @@ public class Converter {
         this.inchesToMeters.put("meters",  Math.round(value / 39.37 * 1000) / 1000.);
     }
 
-    public Map<String, Double> getMetersToInches() {
+    public HashMap<String, Double> getMetersToInches() {
         return metersToInches;
     }
 
-    public Map<String, Double> getInchesToMeters() {
+    public HashMap<String, Double> getInchesToMeters() {
         return inchesToMeters;
     }
 
@@ -65,9 +64,11 @@ public class Converter {
         this.inchesToMeters.put("meters",  Math.round(value / 39.37 * 1000) / 1000.);
     }
 
-    public static void validateData (String value) {
+    public static double validateData (String value)
+            throws NegativeException, NumberFormatException {
         double d = Double.parseDouble(value);
         if (d < 0) throw new NegativeException("Value can't be negative!");
+        return d;
     }
 
 }
