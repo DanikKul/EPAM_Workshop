@@ -4,7 +4,6 @@ import com.workshop.epam_workshop.model.Converter;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,13 +23,13 @@ public class ServiceController{
         logger.info("Trying to parse data...");
         double parsedValue = Converter.validateData(value.strip());
         logger.info("Parsing completed!");
-        return new ResponseEntity<>(new Converter(parsedValue), HttpStatusCode.valueOf(200));
+        return new ResponseEntity<>(new Converter(parsedValue), HttpStatus.OK);
     }
 
     @GetMapping(value = "/")
-    public ResponseEntity<?> home (@RequestParam (value = "user", defaultValue = "User") String value) {
+    public ResponseEntity<?> home () {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Location", "/answer?value=5");
+        headers.add("Location", "/answer");
         return new ResponseEntity<String>(headers, HttpStatus.FOUND);
     }
 

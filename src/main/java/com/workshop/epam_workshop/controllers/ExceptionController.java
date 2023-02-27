@@ -16,13 +16,19 @@ public class ExceptionController {
     @ExceptionHandler(value = NegativeException.class)
     public ResponseStatusException negativeException() {
         logger.error("Error: Negative value");
-        return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Negative value error");
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Negative value error");
     }
 
     @ExceptionHandler(value = NumberFormatException.class)
     public ResponseStatusException parseException() {
         logger.error("Error: Can't parse value");
-        return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Parsing error");
+        return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Parsing error");
+    }
+
+    @ExceptionHandler(value = Exception.class)
+    public ResponseStatusException parseAnyException() {
+        logger.error("Error: Unexpected error");
+        return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error");
     }
 
 }
