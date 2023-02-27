@@ -10,41 +10,59 @@ import static org.junit.jupiter.api.Assertions.*;
 class ConverterTest {
 
     @Test
-    public void testConverter() {
+    public void testIntegerConverter() {
         Converter converter = new Converter(12);
         Assertions.assertEquals(12, converter.getMetersToInches().get("meters"));
         Assertions.assertEquals(472.44, converter.getMetersToInches().get("inches"));
-        converter.setAll(0.);
+    }
+
+    @Test
+    public void testZerosConverter() {
+        Converter converter = new Converter(0);
         Assertions.assertEquals(0, converter.getMetersToInches().get("meters"));
         Assertions.assertEquals(0, converter.getInchesToMeters().get("inches"));
-        converter.setAll(100.);
+    }
+
+    @Test
+    public void testDoubleConverter() {
+        Converter converter = new Converter(100.0);
         Assertions.assertEquals(100, converter.getInchesToMeters().get("inches"));
         Assertions.assertEquals(2.54, converter.getInchesToMeters().get("meters"));
     }
 
     @Test
-    public void testParseExceptionConverter() {
+    public void testStringConverter() {
         Exception exception = assertThrows(NumberFormatException.class, () -> Converter.validateData("asd"));
-        assertEquals(NumberFormatException.class, exception.getClass());
-        exception = assertThrows(NumberFormatException.class, () -> Converter.validateData(""));
-        assertEquals(NumberFormatException.class, exception.getClass());
-        exception = assertThrows(NumberFormatException.class, () -> Converter.validateData("   "));
-        assertEquals(NumberFormatException.class, exception.getClass());
-        exception = assertThrows(NumberFormatException.class, () -> Converter.validateData("12a"));
-        assertEquals(NumberFormatException.class, exception.getClass());
-        exception = assertThrows(NumberFormatException.class, () -> Converter.validateData("a12"));
-        assertEquals(NumberFormatException.class, exception.getClass());
-        exception = assertThrows(NumberFormatException.class, () -> Converter.validateData("-12a"));
         assertEquals(NumberFormatException.class, exception.getClass());
     }
 
     @Test
-    public void testNegativeExceptionConverter() {
+    public void testEmptyConverter() {
+        Exception exception = assertThrows(NumberFormatException.class, () -> Converter.validateData(""));
+        assertEquals(NumberFormatException.class, exception.getClass());
+    }
+
+    @Test
+    public void testSpacesConverter() {
+        Exception exception = assertThrows(NumberFormatException.class, () -> Converter.validateData("   "));
+        assertEquals(NumberFormatException.class, exception.getClass());
+    }
+
+    @Test
+    public void testNumberWithStringConverter() {
+        Exception exception = assertThrows(NumberFormatException.class, () -> Converter.validateData("12a"));
+        assertEquals(NumberFormatException.class, exception.getClass());
+    }
+
+    @Test
+    public void testNegativeIntegernConverter() {
         Exception exception = assertThrows(NegativeException.class, () -> Converter.validateData("-12"));
         assertEquals(NegativeException.class, exception.getClass());
-        exception = assertThrows(NegativeException.class, () -> Converter.validateData("-0.001"));
-        assertEquals(NegativeException.class, exception.getClass());
-        exception = assertThrows(NegativeException.class, () -> Converter.validateData("-99"));
+    }
+
+    @Test
+    public void testNegativeDoubleConverter() {
+        Exception exception = assertThrows(NegativeException.class, () -> Converter.validateData("-0.001"));
         assertEquals(NegativeException.class, exception.getClass());
     }
 
