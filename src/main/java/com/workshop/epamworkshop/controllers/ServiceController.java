@@ -4,6 +4,7 @@ import com.workshop.epamworkshop.cache.CacheResult;
 import com.workshop.epamworkshop.counters.CounterThread;
 import com.workshop.epamworkshop.model.Converter;
 
+import com.workshop.epamworkshop.model.ConverterLogic;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,10 +44,10 @@ public class ServiceController {
         if (values.isEmpty())
             return new ResponseEntity<>("<div style=\"font-size: 40px; text-align:center; height:100%; display: flex; flex-direction: column; justify-content: center;\">" + "<form action=\"/answer\" method=\"get\">" + "<p><input type=\"search\" name=\"value\" placeholder=\"Your Value\"></p>" + "<p><input type=\"submit\" value=\"Convert\"></p>" + "</form></div>", HttpStatus.OK);
         logger.info("Trying to parse data...");
-        if (!values.stream().allMatch(Converter::validateData)) {
+        if (!values.stream().allMatch(ConverterLogic::validateData)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<Double> valuesParsed = values.stream().map(Converter::parseData).sorted().toList();
+        List<Double> valuesParsed = values.stream().map(ConverterLogic::parseData).sorted().toList();
         logger.info("Parsing completed!");
         List<Converter> answers = Stream.concat(
                 valuesParsed.stream()
@@ -70,10 +71,10 @@ public class ServiceController {
     public ResponseEntity<?> getBulkAnswers(@RequestBody String params) {
         JSONObject jsonRequest = new JSONObject(params);
         List<String> values = jsonRequest.toMap().values().stream().map(Object::toString).toList();
-        if (!values.stream().allMatch(Converter::validateData)) {
+        if (!values.stream().allMatch(ConverterLogic::validateData)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<Double> valuesParsed = values.stream().map(Converter::parseData).sorted().toList();
+        List<Double> valuesParsed = values.stream().map(ConverterLogic::parseData).sorted().toList();
         JSONObject jsonResponse = new JSONObject();
         // Следующий код не является оптимизированным, его можно сделать гораздо проще, однако
         // он предназначен для демонстрации работы с lambda выражениями и Stream API.
