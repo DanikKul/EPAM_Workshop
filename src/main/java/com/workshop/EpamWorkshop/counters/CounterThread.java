@@ -1,8 +1,8 @@
-package com.workshop.epam_workshop.counters;
+package com.workshop.EpamWorkshop.counters;
 
 public class CounterThread extends Thread{
     @Override
-    public synchronized void run() {
+    public void run() {
         Counter.add();
     }
 }

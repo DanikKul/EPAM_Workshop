@@ -1,13 +1,13 @@
-package com.workshop.epam_workshop.model;
+package com.workshop.EpamWorkshop.model;
 
-import com.workshop.epam_workshop.cache.CacheResult;
-import com.workshop.epam_workshop.errors.NegativeException;
+import com.workshop.EpamWorkshop.cache.CacheResult;
+import com.workshop.EpamWorkshop.errors.NegativeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 
-public class Converter {
+public class Converter implements Comparable<Converter> {
 
     private final HashMap<String, Double> metersToInches = new HashMap<>();
     private final HashMap<String, Double> inchesToMeters = new HashMap<>();
@@ -67,11 +67,34 @@ public class Converter {
         this.inchesToMeters.put("meters", Math.round(value / 39.37 * 1000) / 1000.);
     }
 
-    public static double validateData(String value)
-            throws NegativeException, NumberFormatException {
+    public static Double parseData(String value) throws NegativeException, NumberFormatException {
         double d = Double.parseDouble(value);
         if (d < 0) throw new NegativeException("Value can't be negative!");
         return d;
+    }
+
+    public static Boolean validateData(String value) throws NegativeException, NumberFormatException {
+        double d = 0;
+        try {
+            d = Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return !(d < 0);
+    }
+
+    private Double convertToInches(Double meters) {
+        return Math.round(meters * 39.37 * 1000) / 1000.;
+    }
+
+    private Double convertToMeters(Double inches) {
+        return Math.round(inches / 39.37 * 1000) / 1000.;
+    }
+
+    @Override
+    public int compareTo(Converter converter) {
+        return this.getUserInput()
+                .compareTo(converter.getUserInput());
     }
 
 }

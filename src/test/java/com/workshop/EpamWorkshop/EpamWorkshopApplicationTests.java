@@ -1,4 +1,4 @@
-package com.workshop.epam_workshop;
+package com.workshop.EpamWorkshop;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

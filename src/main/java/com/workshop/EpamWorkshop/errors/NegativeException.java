@@ -1,4 +1,4 @@
-package com.workshop.epam_workshop.errors;
+package com.workshop.EpamWorkshop.errors;
 
 
 public class NegativeException extends RuntimeException{

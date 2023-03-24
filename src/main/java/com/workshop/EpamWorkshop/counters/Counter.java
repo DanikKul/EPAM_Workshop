@@ -1,4 +1,4 @@
-package com.workshop.epam_workshop.counters;
+package com.workshop.EpamWorkshop.counters;
 
 public class Counter {
 
