@@ -1,4 +1,4 @@
-package com.workshop.EpamWorkshop;
+package com.workshop.epamworkshop;
 
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;

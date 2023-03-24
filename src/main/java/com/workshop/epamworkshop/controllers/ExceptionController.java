@@ -1,6 +1,6 @@
-package com.workshop.EpamWorkshop.controllers;
+package com.workshop.epamworkshop.controllers;
 
-import com.workshop.EpamWorkshop.errors.NegativeException;
+import com.workshop.epamworkshop.errors.NegativeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;

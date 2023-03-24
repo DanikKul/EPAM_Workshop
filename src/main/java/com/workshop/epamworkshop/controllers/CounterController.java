@@ -1,6 +1,6 @@
-package com.workshop.EpamWorkshop.controllers;
+package com.workshop.epamworkshop.controllers;
 
-import com.workshop.EpamWorkshop.counters.Counter;
+import com.workshop.epamworkshop.counters.Counter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

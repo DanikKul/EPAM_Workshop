@@ -1,7 +1,7 @@
-package com.workshop.EpamWorkshop.model;
+package com.workshop.epamworkshop.model;
 
-import com.workshop.EpamWorkshop.cache.CacheResult;
-import com.workshop.EpamWorkshop.errors.NegativeException;
+import com.workshop.epamworkshop.cache.CacheResult;
+import com.workshop.epamworkshop.errors.NegativeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

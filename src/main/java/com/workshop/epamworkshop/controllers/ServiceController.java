@@ -1,8 +1,8 @@
-package com.workshop.EpamWorkshop.controllers;
+package com.workshop.epamworkshop.controllers;
 
-import com.workshop.EpamWorkshop.cache.CacheResult;
-import com.workshop.EpamWorkshop.counters.CounterThread;
-import com.workshop.EpamWorkshop.model.Converter;
+import com.workshop.epamworkshop.cache.CacheResult;
+import com.workshop.epamworkshop.counters.CounterThread;
+import com.workshop.epamworkshop.model.Converter;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

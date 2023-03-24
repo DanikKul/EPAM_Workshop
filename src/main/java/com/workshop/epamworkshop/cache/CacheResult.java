@@ -1,6 +1,6 @@
-package com.workshop.EpamWorkshop.cache;
+package com.workshop.epamworkshop.cache;
 
-import com.workshop.EpamWorkshop.model.Converter;
+import com.workshop.epamworkshop.model.Converter;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
