@@ -5,8 +5,6 @@ import com.workshop.EpamWorkshop.errors.NegativeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
-
 public class Converter implements Comparable<Converter> {
 
     private Double userInput;
