@@ -9,9 +9,9 @@ import java.util.HashMap;
 
 public class Converter implements Comparable<Converter> {
 
-    private final HashMap<String, Double> metersToInches = new HashMap<>();
-    private final HashMap<String, Double> inchesToMeters = new HashMap<>();
     private Double userInput;
+    private Double meters;
+    private Double inches;
     private static final Logger logger = LogManager.getLogger(Converter.class);
 
     private static final CacheResult cache = new CacheResult();
@@ -19,27 +19,16 @@ public class Converter implements Comparable<Converter> {
     public Converter(Double value) {
         logger.info("Created Converter with double");
         this.userInput = value;
-        this.metersToInches.put("meters", value);
-        this.metersToInches.put("inches", Math.round(value * 39.37 * 1000) / 1000.);
-        this.inchesToMeters.put("inches", value);
-        this.inchesToMeters.put("meters", Math.round(value / 39.37 * 1000) / 1000.);
+        this.meters = convertToMeters(value);
+        this.inches = convertToInches(value);
     }
 
-    public Converter(Integer value) {
-        logger.info("Created Converter with Integer");
-        this.userInput = Double.valueOf(value);
-        this.metersToInches.put("meters", Double.valueOf(value));
-        this.metersToInches.put("inches", Math.round(value * 39.37 * 1000) / 1000.);
-        this.inchesToMeters.put("inches", Double.valueOf(value));
-        this.inchesToMeters.put("meters", Math.round(value / 39.37 * 1000) / 1000.);
+    public Double getInches() {
+        return inches;
     }
 
-    public HashMap<String, Double> getMetersToInches() {
-        return metersToInches;
-    }
-
-    public HashMap<String, Double> getInchesToMeters() {
-        return inchesToMeters;
+    public Double getMeters() {
+        return meters;
     }
 
     public Double getUserInput() {
@@ -47,13 +36,11 @@ public class Converter implements Comparable<Converter> {
     }
 
     public void setInchesToMeters(Double inches) {
-        this.inchesToMeters.put("inches", inches);
-        this.inchesToMeters.put("meters", Math.round(inches / 39.37 * 1000) / 1000.);
+        this.inches = inches;
     }
 
     public void setMetersToInches(Double meters) {
-        this.metersToInches.put("meters", meters);
-        this.metersToInches.put("inches", Math.round(meters * 39.37 * 1000) / 1000.);
+        this.meters = meters;
     }
 
     public void setUserInput(Double input) {
@@ -61,10 +48,9 @@ public class Converter implements Comparable<Converter> {
     }
 
     public void setAll(Double value) {
-        this.metersToInches.put("meters", value);
-        this.metersToInches.put("inches", Math.round(value * 39.37 * 1000) / 1000.);
-        this.inchesToMeters.put("inches", value);
-        this.inchesToMeters.put("meters", Math.round(value / 39.37 * 1000) / 1000.);
+        this.userInput = value;
+        this.inches = convertToInches(value);
+        this.meters = convertToInches(value);
     }
 
     public static Double parseData(String value) throws NegativeException, NumberFormatException {
@@ -73,7 +59,7 @@ public class Converter implements Comparable<Converter> {
         return d;
     }
 
-    public static Boolean validateData(String value) throws NegativeException, NumberFormatException {
+    public static Boolean validateData(String value) {
         double d = 0;
         try {
             d = Double.parseDouble(value);

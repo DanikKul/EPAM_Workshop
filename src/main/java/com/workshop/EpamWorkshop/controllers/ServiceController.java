@@ -37,6 +37,7 @@ public class ServiceController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Successfully converted", content = {@Content(mediaType = "application/json")}), @ApiResponse(responseCode = "400", description = "Negative number", content = @Content), @ApiResponse(responseCode = "500", description = "Can't parse into double", content = @Content)})
     @GetMapping(value = "/answer")
     public ResponseEntity<?> getAnswer(@RequestParam(value = "value", defaultValue = "") List<String> values) {
+        // Данный обработчик переделан, учитывая тот факт, что в queryParams может быть передан список значений
         CounterThread counter = new CounterThread();
         counter.start();
         if (values.isEmpty())
@@ -74,6 +75,10 @@ public class ServiceController {
         }
         List<Double> valuesParsed = values.stream().map(Converter::parseData).sorted().toList();
         JSONObject jsonResponse = new JSONObject();
+        // Следующий код не является оптимизированным, его можно сделать гораздо проще, однако
+        // он предназначен для демонстрации работы с lambda выражениями и Stream API.
+        // В данном случае сначала берутся значения, объекты которых уже подсчитаны в кеше
+        // и соединяются с объектами, которых нет в кеше.
         List<Converter> answers = Stream.concat(
                         valuesParsed.stream()
                                 .filter(value -> cache.contains(value))
@@ -88,6 +93,7 @@ public class ServiceController {
                 )
                 .sorted()
                 .toList();
+        // Подсчет аггрегирующих значений (min, max, average, amount)
         jsonResponse.put("answers", answers);
         jsonResponse.put("minUserInput", answers.stream()
                 .mapToDouble(Converter::getUserInput)
