@@ -38,7 +38,6 @@ public class ServiceController {
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Successfully converted", content = {@Content(mediaType = "application/json")}), @ApiResponse(responseCode = "400", description = "Negative number", content = @Content), @ApiResponse(responseCode = "500", description = "Can't parse into double", content = @Content)})
     @GetMapping(value = "/answer")
     public ResponseEntity<?> getAnswer(@RequestParam(value = "value", defaultValue = "") List<String> values) {
-        // Данный обработчик переделан, учитывая тот факт, что в queryParams может быть передан список значений
         CounterThread counter = new CounterThread();
         counter.start();
         if (values.isEmpty())
@@ -74,12 +73,8 @@ public class ServiceController {
         if (!values.stream().allMatch(ConverterLogic::validateData)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<Double> valuesParsed = values.stream().map(ConverterLogic::parseData).sorted().toList();
-        JSONObject jsonResponse = new JSONObject();
-        // Следующий код не является оптимизированным, его можно сделать гораздо проще, однако
-        // он предназначен для демонстрации работы с lambda выражениями и Stream API.
-        // В данном случае сначала берутся значения, объекты которых уже подсчитаны в кеше
-        // и соединяются с объектами, которых нет в кеше.
+        List<Double> valuesParsed = values.stream().map(ConverterLogic::parseData).toList();
+        JSONObject jsonResponse;
         List<Converter> answers = Stream.concat(
                         valuesParsed.stream()
                                 .filter(value -> cache.contains(value))
@@ -95,6 +90,22 @@ public class ServiceController {
                 .sorted()
                 .toList();
         // Подсчет аггрегирующих значений (min, max, average, amount)
+        jsonResponse = buildJSON(answers);
+        if (answers.size() == 1) return new ResponseEntity<>(answers.get(0), HttpStatus.OK);
+
+        return new ResponseEntity<>(jsonResponse.toString(), HttpStatus.OK);
+    }
+
+    @Tag(name = "Home")
+    @Operation(summary = "Home")
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Successfully converted", content = {@Content(mediaType = "application/json")})})
+    @GetMapping(value = "/")
+    public ResponseEntity<?> home() {
+        return new ResponseEntity<>("<div style=\"font-size: 40px; text-align:center; height:100%; display: flex; flex-direction: column; justify-content: center;\">" + "<p style=\"color: orange; text-decoration: none;\">Actions</p>" + "<a style=\"color: red; text-decoration: none;\" href=\"/answer\">Get converted value</a>" + "<a style=\"color: red; text-decoration: none;\" href=\"/counter\">Get counter</a>" + "</div>", HttpStatus.OK);
+    }
+
+    public JSONObject buildJSON(List<Converter> answers) {
+        JSONObject jsonResponse = new JSONObject();
         jsonResponse.put("answers", answers);
         jsonResponse.put("minUserInput", answers.stream()
                 .mapToDouble(Converter::getUserInput)
@@ -107,17 +118,31 @@ public class ServiceController {
                 .mapToDouble(Converter::getUserInput)
                 .average()
                 .orElse(-1));
+        jsonResponse.put("avgMeters", answers.stream()
+                .mapToDouble(Converter::getMeters)
+                .average()
+                .orElse(-1));
+        jsonResponse.put("minMeters", answers.stream()
+                .mapToDouble(Converter::getMeters)
+                .min()
+                .orElse(-1));
+        jsonResponse.put("maxMeters", answers.stream()
+                .mapToDouble(Converter::getMeters)
+                .max()
+                .orElse(-1));
+        jsonResponse.put("maxInches", answers.stream()
+                .mapToDouble(Converter::getInches)
+                .max()
+                .orElse(-1));
+        jsonResponse.put("minInches", answers.stream()
+                .mapToDouble(Converter::getInches)
+                .min()
+                .orElse(-1));
+        jsonResponse.put("avgInches", answers.stream()
+                .mapToDouble(Converter::getInches)
+                .average()
+                .orElse(-1));
         jsonResponse.put("amount", answers.size());
-        if (answers.size() == 1) return new ResponseEntity<>(answers.get(0), HttpStatus.OK);
-
-        return new ResponseEntity<>(jsonResponse.toString(), HttpStatus.OK);
-    }
-
-    @Tag(name = "Home")
-    @Operation(summary = "Home")
-    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Successfully converted", content = {@Content(mediaType = "application/json")})})
-    @GetMapping(value = "/")
-    public ResponseEntity<?> home() {
-        return new ResponseEntity<>("<div style=\"font-size: 40px; text-align:center; height:100%; display: flex; flex-direction: column; justify-content: center;\">" + "<p style=\"color: orange; text-decoration: none;\">Actions</p>" + "<a style=\"color: red; text-decoration: none;\" href=\"/answer\">Get converted value</a>" + "<a style=\"color: red; text-decoration: none;\" href=\"/counter\">Get counter</a>" + "</div>", HttpStatus.OK);
+        return jsonResponse;
     }
 }

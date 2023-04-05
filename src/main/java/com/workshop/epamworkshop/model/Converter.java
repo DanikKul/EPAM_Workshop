@@ -1,10 +1,8 @@
 package com.workshop.epamworkshop.model;
 
 import com.workshop.epamworkshop.cache.CacheResult;
-import com.workshop.epamworkshop.errors.NegativeException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import com.workshop.epamworkshop.model.ConverterLogic;
 
 public class Converter implements Comparable<Converter> {
 
