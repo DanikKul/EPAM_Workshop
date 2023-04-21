@@ -25,4 +25,11 @@ public class ConverterLogic {
         }
         return !(d < 0);
     }
+
+    public static void setAll(Converter conv, Double value) {
+        conv.setUserInput(value);
+        conv.setInches(ConverterLogic.convertToInches(value));
+        conv.setMeters(ConverterLogic.convertToMeters(value));
+        conv.setId((long) value.hashCode());
+    }
 }

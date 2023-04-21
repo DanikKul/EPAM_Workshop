@@ -5,6 +5,7 @@ import com.workshop.epamworkshop.counters.CounterThread;
 import com.workshop.epamworkshop.model.Converter;
 
 import com.workshop.epamworkshop.model.ConverterLogic;
+import com.workshop.epamworkshop.services.ConverterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,13 +13,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 @RestController
@@ -27,6 +32,9 @@ public class ServiceController {
     private static final Logger logger = LogManager.getLogger(ServiceController.class);
 
     private CacheResult cache;
+
+    @Autowired
+    private ConverterService service;
 
     @Autowired
     public void setCache(CacheResult cache) {
@@ -46,24 +54,15 @@ public class ServiceController {
         if (!values.stream().allMatch(ConverterLogic::validateData)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<Double> valuesParsed = values.stream().map(ConverterLogic::parseData).sorted().toList();
         logger.info("Parsing completed!");
-        List<Converter> answers = Stream.concat(
-                valuesParsed.stream()
-                        .filter(value -> cache.contains(value))
-                        .map(value -> cache.getCache(value)),
-                valuesParsed.stream()
-                        .filter(value -> !cache.contains(value))
-                        .map(value -> {
-                            Converter conv = new Converter(value);
-                            cache.putCache(conv);
-                            return conv;
-                        })
-                )
-                .sorted()
-                .toList();
-        if (answers.size() == 1) return new ResponseEntity<>(answers.get(0), HttpStatus.OK);
-        return new ResponseEntity<>(answers, HttpStatus.OK);
+        List<Double> valuesParsed = values.stream().map(ConverterLogic::parseData).toList();
+        List<Long> ids = new ArrayList<>();
+        for (int i = 0; i < values.size(); i++) {
+            ids.add((long) valuesParsed.get(i).hashCode());
+        }
+        CompletableFuture<List<Converter>> answers = CompletableFuture.supplyAsync(() -> processData(values));
+        answers.thenAccept(this::saveToDatabase);
+        return new ResponseEntity<>(ids, HttpStatus.OK);
     }
 
     @PostMapping(value = "/bulkAnswers")
@@ -74,26 +73,31 @@ public class ServiceController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         List<Double> valuesParsed = values.stream().map(ConverterLogic::parseData).toList();
-        JSONObject jsonResponse;
-        List<Converter> answers = Stream.concat(
-                        valuesParsed.stream()
-                                .filter(value -> cache.contains(value))
-                                .map(value -> cache.getCache(value)),
-                        valuesParsed.stream()
-                                .filter(value -> !cache.contains(value))
-                                .map(value -> {
-                                    Converter conv = new Converter(value);
-                                    cache.putCache(conv);
-                                    return conv;
-                                })
-                )
-                .sorted()
-                .toList();
-        // Подсчет аггрегирующих значений (min, max, average, amount)
-        jsonResponse = buildJSON(answers);
-        if (answers.size() == 1) return new ResponseEntity<>(answers.get(0), HttpStatus.OK);
+        List<Long> ids = new ArrayList<>();
+        for (int i = 0; i < valuesParsed.size(); i++) {
+            ids.add((long) valuesParsed.get(i).hashCode());
+        }
+        CompletableFuture<List<Converter>> answers = CompletableFuture.supplyAsync(() -> processData(values));
+        answers.thenAccept(this::saveToDatabase);
+        return new ResponseEntity<>(ids, HttpStatus.OK);
+    }
 
-        return new ResponseEntity<>(jsonResponse.toString(), HttpStatus.OK);
+    @GetMapping(value = "/getFromDB")
+    public ResponseEntity<?> getFromDB(@RequestParam(value="id", defaultValue = "") Long value) {
+        Converter converter = service.getConverterById(value).orElse(null);
+        if (converter == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(converter, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getFromDBByInput")
+    public ResponseEntity<?> getFromDBByInput(@RequestParam(value="value", defaultValue = "") Double value) {
+        Converter converter = service.getConverter(value);
+        if (converter == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(converter, HttpStatus.OK);
     }
 
     @Tag(name = "Home")
@@ -104,45 +108,29 @@ public class ServiceController {
         return new ResponseEntity<>("<div style=\"font-size: 40px; text-align:center; height:100%; display: flex; flex-direction: column; justify-content: center;\">" + "<p style=\"color: orange; text-decoration: none;\">Actions</p>" + "<a style=\"color: red; text-decoration: none;\" href=\"/answer\">Get converted value</a>" + "<a style=\"color: red; text-decoration: none;\" href=\"/counter\">Get counter</a>" + "</div>", HttpStatus.OK);
     }
 
-    public JSONObject buildJSON(List<Converter> answers) {
-        JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put("answers", answers);
-        jsonResponse.put("minUserInput", answers.stream()
-                .mapToDouble(Converter::getUserInput)
-                .min().orElse(-1));
-        jsonResponse.put("maxUserInput", answers.stream()
-                .mapToDouble(Converter::getUserInput)
-                .max()
-                .orElse(-1));
-        jsonResponse.put("avgUserInput", answers.stream()
-                .mapToDouble(Converter::getUserInput)
-                .average()
-                .orElse(-1));
-        jsonResponse.put("avgMeters", answers.stream()
-                .mapToDouble(Converter::getMeters)
-                .average()
-                .orElse(-1));
-        jsonResponse.put("minMeters", answers.stream()
-                .mapToDouble(Converter::getMeters)
-                .min()
-                .orElse(-1));
-        jsonResponse.put("maxMeters", answers.stream()
-                .mapToDouble(Converter::getMeters)
-                .max()
-                .orElse(-1));
-        jsonResponse.put("maxInches", answers.stream()
-                .mapToDouble(Converter::getInches)
-                .max()
-                .orElse(-1));
-        jsonResponse.put("minInches", answers.stream()
-                .mapToDouble(Converter::getInches)
-                .min()
-                .orElse(-1));
-        jsonResponse.put("avgInches", answers.stream()
-                .mapToDouble(Converter::getInches)
-                .average()
-                .orElse(-1));
-        jsonResponse.put("amount", answers.size());
-        return jsonResponse;
+    public void saveToDatabase(List<Converter> answers) {
+        for (Converter answer : answers) {
+            service.findOrCreateByInput(answer.getUserInput());
+        }
     }
+
+    public List<Converter> processData(List<String> values) {
+        List<Double> valuesParsed = values.stream().map(ConverterLogic::parseData).toList();
+        return Stream.concat(
+                        valuesParsed.stream()
+                                .filter(value -> cache.contains(value))
+                                .map(value -> cache.getCache(value)),
+                        valuesParsed.stream()
+                                .filter(value -> !cache.contains(value))
+                                .map(value -> {
+                                    Converter conv = new Converter();
+                                    ConverterLogic.setAll(conv, value);
+                                    cache.putCache(conv);
+                                    return conv;
+                                })
+                )
+                .sorted()
+                .toList();
+    }
+
 }
